@@ -23,6 +23,8 @@
 #ifndef TICKER_H
 #define TICKER_H
 
+#include <esp32-hal-log.h>
+
 extern "C" {
 	#include "esp_timer.h"
 }
@@ -32,74 +34,32 @@ class Ticker
 public:
 	Ticker();
 	~Ticker();
-	typedef void (*callback_t)(void);
+	typedef void (*callback_t)();
 	typedef void (*callback_with_arg_t)(void*);
 
-	void attach(float seconds, callback_t callback)
-	{
-		_attach_ms(seconds * 1000, true, reinterpret_cast<callback_with_arg_t>(callback), 0);
-	}
-
-	void attach_ms(uint32_t milliseconds, callback_t callback)
-	{
-		_attach_ms(milliseconds, true, reinterpret_cast<callback_with_arg_t>(callback), 0);
-	}
-
+    __attribute__((unused)) void attach(float seconds, callback_t callback);
+    __attribute__((unused)) void attach_ms(uint32_t milliseconds, callback_t callback);
 	template<typename TArg>
-	void attach(float seconds, void (*callback)(TArg), TArg arg)
-	{
-		static_assert(sizeof(TArg) <= sizeof(uint32_t), "attach() callback argument size must be <= 4 bytes");
-		// C-cast serves two purposes:
-		// static_cast for smaller integer types,
-		// reinterpret_cast + const_cast for pointer types
-		uint32_t arg32 = (uint32_t)arg;
-		_attach_ms(seconds * 1000, true, reinterpret_cast<callback_with_arg_t>(callback), arg32);
-	}
-
+    __attribute__((unused)) void attach(float seconds, void (*callback)(TArg), TArg arg);
 	template<typename TArg>
-	void attach_ms(uint32_t milliseconds, void (*callback)(TArg), TArg arg)
-	{
-		static_assert(sizeof(TArg) <= sizeof(uint32_t), "attach_ms() callback argument size must be <= 4 bytes");
-		uint32_t arg32 = (uint32_t)arg;
-		_attach_ms(milliseconds, true, reinterpret_cast<callback_with_arg_t>(callback), arg32);
-	}
+    __attribute__((unused)) void attach_ms(uint32_t milliseconds, void (*callback)(TArg), TArg arg);
 
-	void once(float seconds, callback_t callback)
-	{
-		_attach_ms(seconds * 1000, false, reinterpret_cast<callback_with_arg_t>(callback), 0);
-	}
-
-	void once_ms(uint32_t milliseconds, callback_t callback)
-	{
-		_attach_ms(milliseconds, false, reinterpret_cast<callback_with_arg_t>(callback), 0);	
-	}
-
+    __attribute__((unused)) void once(float seconds, callback_t callback);
+    template<typename TArg>
+    __attribute__((unused)) void once(float seconds, void (*callback)(TArg), TArg arg);
+    __attribute__((unused)) void once_ms(uint32_t milliseconds, callback_t callback);
 	template<typename TArg>
-	void once(float seconds, void (*callback)(TArg), TArg arg)
-	{
-		static_assert(sizeof(TArg) <= sizeof(uint32_t), "attach() callback argument size must be <= 4 bytes");
-		uint32_t arg32 = (uint32_t)(arg);
-		_attach_ms(seconds * 1000, false, reinterpret_cast<callback_with_arg_t>(callback), arg32);
-	}
+    __attribute__((unused)) void once_ms(uint32_t milliseconds, void (*callback)(TArg), TArg arg);
 
-	template<typename TArg>
-	void once_ms(uint32_t milliseconds, void (*callback)(TArg), TArg arg)
-	{
-		static_assert(sizeof(TArg) <= sizeof(uint32_t), "attach_ms() callback argument size must be <= 4 bytes");
-		uint32_t arg32 = (uint32_t)(arg);
-		_attach_ms(milliseconds, false, reinterpret_cast<callback_with_arg_t>(callback), arg32);
-	}
-
-	void detach();
-	bool active();
+    __attribute__((unused)) void detach();
+    __attribute__((unused)) bool active();
 
 protected:	
-	void _attach_ms(uint32_t milliseconds, bool repeat, callback_with_arg_t callback, uint32_t arg);
-
+    void _attach_ms(uint32_t milliseconds, bool repeat, callback_with_arg_t callback, uintptr_t arg);
+    static uint32_t _to_ms(float seconds);
 
 protected:
 	esp_timer_handle_t _timer;
 };
 
-
-#endif//TICKER_H
+#endif // TICKER_H

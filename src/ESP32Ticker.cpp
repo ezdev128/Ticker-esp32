@@ -24,14 +24,14 @@
 
 #include "ESP32Ticker.h"
 
-Ticker::Ticker() :
-  _timer(nullptr) {}
+Ticker::Ticker() : _timer(nullptr) {
+}
 
 Ticker::~Ticker() {
   detach();
 }
 
-void Ticker::_attach_ms(uint32_t milliseconds, bool repeat, callback_with_arg_t callback, uint32_t arg) {
+void Ticker::_attach_ms(uint32_t milliseconds, bool repeat, callback_with_arg_t callback, uintptr_t arg) {
   esp_timer_create_args_t _timerConfig;
   _timerConfig.arg = reinterpret_cast<void*>(arg);
   _timerConfig.callback = callback;
@@ -49,10 +49,55 @@ void Ticker::_attach_ms(uint32_t milliseconds, bool repeat, callback_with_arg_t 
   }
 }
 
-void Ticker::detach() {
+uint32_t Ticker::_to_ms(float seconds) {
+    return (uint32_t)(seconds * 1000);
+}
+
+__attribute__((unused)) void Ticker::detach() {
   if (_timer) {
     esp_timer_stop(_timer);
     esp_timer_delete(_timer);
     _timer = nullptr;
   }
+}
+
+__attribute__((unused)) void Ticker::attach(float seconds, Ticker::callback_t callback) {
+    _attach_ms(_to_ms(seconds), true, reinterpret_cast<callback_with_arg_t>(callback), 0);
+}
+
+
+__attribute__((unused)) void Ticker::attach_ms(uint32_t milliseconds, Ticker::callback_t callback) {
+    _attach_ms(milliseconds, true, reinterpret_cast<callback_with_arg_t>(callback), 0);
+}
+
+template<typename TArg>
+__attribute__((unused)) void Ticker::attach(float seconds, void (*callback)(TArg), TArg arg) {
+    static_assert(sizeof(TArg) <= sizeof(uintptr_t), "attach() callback argument size must be <= 32 bytes");
+    _attach_ms(_to_ms(seconds), true, reinterpret_cast<callback_with_arg_t>(callback), (uintptr_t)arg);
+}
+
+template<typename TArg>
+__attribute__((unused)) void Ticker::attach_ms(uint32_t milliseconds, void (*callback)(TArg), TArg arg) {
+    static_assert(sizeof(TArg) <= sizeof(uintptr_t), "attach_ms() callback argument size must be <= 32 bytes");
+    _attach_ms(milliseconds, true, reinterpret_cast<callback_with_arg_t>(callback), (uintptr_t)arg);
+}
+
+__attribute__((unused)) void Ticker::once(float seconds, Ticker::callback_t callback) {
+    _attach_ms(_to_ms(seconds), false, reinterpret_cast<callback_with_arg_t>(callback), 0);
+}
+
+__attribute__((unused)) void Ticker::once_ms(uint32_t milliseconds, Ticker::callback_t callback) {
+    _attach_ms(milliseconds, false, reinterpret_cast<callback_with_arg_t>(callback), 0);
+}
+
+template<typename TArg>
+__attribute__((unused)) void Ticker::once(float seconds, void (*callback)(TArg), TArg arg) {
+    static_assert(sizeof(TArg) <= sizeof(uintptr_t), "attach() callback argument size must be <= 32 bytes");
+    _attach_ms(_to_ms(seconds), false, reinterpret_cast<callback_with_arg_t>(callback), (uintptr_t)(arg));
+}
+
+template<typename TArg>
+__attribute__((unused)) void Ticker::once_ms(uint32_t milliseconds, void (*callback)(TArg), TArg arg) {
+    static_assert(sizeof(TArg) <= sizeof(uintptr_t), "attach_ms() callback argument size must be <= 32 bytes");
+    _attach_ms(milliseconds, false, reinterpret_cast<callback_with_arg_t>(callback), (uintptr_t)(arg));
 }
