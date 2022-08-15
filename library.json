@@ -1,36 +1,36 @@
 {
   "name": "Ticker-esp32",
   "version": "1.1.1",
-  "keywords": "Arduino, timer, ticker, esp32",
-  "description": "Ticker library for ESP32",
+  "keywords": "Arduino, timer, ticker, multiticker, esp32",
+  "description": "Ticker library with multi ticker ability for ESP32",
   "license": "MIT",
   "authors":
   [
     {
+      "name": "Konstantin M.",
+      "url": "https://github.com/ezdev128",
+      "maintainer": false
+    },
+    {
       "name": "Bert Melis",
       "url": "https://github.com/bertmelis",
-      "maintainer": true
+      "maintainer": false
     },
     {
       "name": "Ivan Grokhotkov",
       "url": "https://github.com/igrr",
-      "maintainer": false
-    },
-    {
-      "name": "K.",
-      "url": "https://github.com/ezdev128",
       "maintainer": false
     }
   ],
   "repository":
   {
     "type": "git",
-    "url": "https://github.com/ezdev128/Ticker-esp32.git",
+    "url": "https://github.com/ezdev128/Ticker-esp32",
     "branch": "master"
   },
   "frameworks": "arduino",
   "platforms": "espressif32",
   "build": {
     "libCompatMode": 2
-  }
+  }   
 }
